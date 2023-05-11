@@ -7,18 +7,16 @@ static uint8_t led_buf[PACKEGE_LEN] = {};
 
 void app()
 {
-    extern DMA_HandleTypeDef hdma_tim1_ch1;
-
     uint8_t RGB[3] = {100, 100, 100};
     struct led_strp led;
     ws2812_init(&led, led_buf, LEDS, &htim1, TIM_CHANNEL_1, &hdma_tim1_ch1);
-    ws2812_set_LED(&led, 1, RGB);
+    // ws2812_set_LED(1, RGB);
     while (1)
     {
-        /* code */  
+        /* code */
     }
+    
 }
-
 
 // // /*uint32_t answer = 0;
 // // uint8_t sim = 0;

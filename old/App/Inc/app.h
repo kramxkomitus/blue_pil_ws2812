@@ -4,6 +4,8 @@
 #include "main.h"
 #include "stdbool.h"
 #include "ws2812.h"
+#include "tim.h"
+#include "dma.h"
 #include "stm32f1xx_it.h"
 
 

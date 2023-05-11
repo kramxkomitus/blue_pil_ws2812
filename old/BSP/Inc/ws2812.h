@@ -1,6 +1,5 @@
 #include "main.h"
 #include "tim.h"
-#include "dma.h"
 #include "stdbool.h"
 #include "stm32f1xx_hal_dma.h"
 
@@ -32,8 +31,5 @@ struct led_strp ws2812_init(
     TIM_HandleTypeDef *tim,
     uint32_t tim_chanel,
     DMA_HandleTypeDef *dma);
-
-
-bool ws2812_set_LED(struct led_strp *S, uint8_t led_No, uint8_t *RGB_arr);
 
 void ws2812_CallBack(DMA_HandleTypeDef *_hdma);
