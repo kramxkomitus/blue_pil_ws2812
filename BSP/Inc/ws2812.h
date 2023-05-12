@@ -1,3 +1,6 @@
+#ifndef INC_WS2812_H_
+#define INC_WS2812_H_
+
 #include "main.h"
 #include "tim.h"
 #include "dma.h"
@@ -12,8 +15,8 @@ struct led_strp
 
     enum
     {
-        FREE,
-        BUSY
+        WAIT,
+        ACTIVE
     } state;
 
     TIM_HandleTypeDef *tim;
@@ -37,3 +40,5 @@ struct led_strp ws2812_init(
 bool ws2812_set_LED(struct led_strp *S, uint8_t led_No, uint8_t *RGB_arr);
 
 void ws2812_CallBack(DMA_HandleTypeDef *_hdma);
+
+#endif /* INC_WS2812_H_ */

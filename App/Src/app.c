@@ -3,22 +3,82 @@
 #define LEDS 8
 #define PACKAGE_LEN LEDS * 3
 
-static uint8_t led_buf[PACKEGE_LEN] = {};
+// static uint8_t led_buf[PACKEGE_LEN] = {};
 
 void app()
 {
-    extern DMA_HandleTypeDef hdma_tim1_ch1;
+    // extern DMA_HandleTypeDef hdma_tim1_ch1;
+    // uint8_t RGB[3] = {100, 100, 100};
+    // struct led_strp led;
+    // ws2812_init(&led, led_buf, LEDS, &htim1, TIM_CHANNEL_1, &hdma_tim1_ch1);
+    // ws2812_set_LED(&led, 1, RGB);
+    // console_start();
 
-    uint8_t RGB[3] = {100, 100, 100};
-    struct led_strp led;
-    ws2812_init(&led, led_buf, LEDS, &htim1, TIM_CHANNEL_1, &hdma_tim1_ch1);
-    ws2812_set_LED(&led, 1, RGB);
+    uart_send_mes_IT("Hello world!");
+
+    // uint8_t flag = 0;
+    // uint8_t Rx_buff[20] = {0};
+    // uart_ask_str_IT(Rx_buff);
     while (1)
     {
-        /* code */  
+        /* code */
     }
 }
 
+// void uart_str_RxCPLTCallback()
+// {
+
+//     uint8_t *word_arr[10];
+//     uint8_t *word;
+//     uint8_t i = 0;
+//     volatile int32_t arg = 0;
+//     struct drive *cur_d = NULL;
+//     word = strtok(command, " ");
+//     while (word != NULL)
+//     {
+//         word_arr[i] = word;
+//         i++;
+//         word = strtok(NULL, " ");
+//     }
+//     word_arr[i] = NULL;
+
+//     if (strcmp(word_arr[0], "whoareyou") == 0)
+//     {
+//         uart_send_mes_IT("drives\n");
+//     }
+
+//     if (strcmp(word_arr[0], "start") == 0 || strcmp(word_arr[0], "START") == 0)
+//     {
+
+//         drive_on(&drv_l);
+//         drive_on(&drv_r);
+//     }
+//     if (strcmp(word_arr[0], "stop") == 0 || strcmp(word_arr[0], "STOP") == 0)
+//     {
+
+//         drive_off(&drv_l);
+//         drive_off(&drv_r);
+//     }
+//     if (strcmp(word_arr[0], "r") == 0 || (strcmp(word_arr[0], "R") == 0))
+//     {
+
+//         arg = atoi(word_arr[1]);
+//         drive_set_vel(&drv_r, arg);
+//     }
+//     if (strcmp(word_arr[0], "l") == 0 || strcmp(word_arr[0], "L") == 0)
+//     {
+//         arg = atoi(word_arr[1]);
+//         drive_set_vel(&drv_l, arg);
+//     }
+//     if (strcmp(word_arr[0], "AXEL") == 0 || strcmp(word_arr[0], "axel") == 0)
+//     {
+//         arg = atoi(word_arr[1]);
+//         drive_set_axel(&drv_l, arg);
+//         drive_set_axel(&drv_r, arg);
+//     }
+//     command[0] = '\0';
+//     uart_ask_str_IT(command);
+// }
 
 // // /*uint32_t answer = 0;
 // // uint8_t sim = 0;

@@ -22,7 +22,7 @@ struct led_strp ws2812_init(
     DMA_HandleTypeDef *dma)
 {
     led->buf = buf;
-    led->state = FREE;
+    led->state = WAIT;
     led->tim = tim;
     led->tim_chanel = tim_chanel;
     led->dma = dma;
