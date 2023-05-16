@@ -12,15 +12,24 @@ void app()
     // struct led_strp led;
     // ws2812_init(&led, led_buf, LEDS, &htim1, TIM_CHANNEL_1, &hdma_tim1_ch1);
     // ws2812_set_LED(&led, 1, RGB);
-    // console_start();
 
-    uart_send_mes_IT("Hello world!");
+    // uart_send_mes_IT("Hello world!\n");
+    // console_start();
 
     // uint8_t flag = 0;
     // uint8_t Rx_buff[20] = {0};
     // uart_ask_str_IT(Rx_buff);
+
+    struct uart_t uart_1;
+    struct console_t terminal_1;
+    uart_init(&uart_1, &huart1, '\n');
+    console_init(&terminal_1, &uart_1);
+
     while (1)
     {
+        console_send_mes(&terminal_1, "start\n");
+        console_processing(&terminal_1);
+        HAL_Delay(100);
         /* code */
     }
 }

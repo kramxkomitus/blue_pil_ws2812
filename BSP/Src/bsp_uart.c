@@ -2,17 +2,47 @@
 
 #define max_Tx_buf 100
 #define max_Rx_buf 100
+#define max_map_grid_records 10
 
+// initialisation
 
-
-
-uint8_t UART_stop_byte = '\n';
-uint8_t Rx_buf_size;
-uint8_t *Rx_buff = NULL;
-
-bool uart_send_mes_IT(uint8_t *message)
+static struct
 {
-  if (UART_Tx_state == UART_LINE_STATE_ACTIVE)
+  UART_HandleTypeDef *hal_uart[max_map_grid_records];
+  struct uart_t *bsp_uart[max_map_grid_records];
+} uart_map_grid;
+
+void uart_reg_struct(struct uart_t *uart, UART_HandleTypeDef *uart_p)
+{
+  for (uint8_t i = 0; i < max_map_grid_records; i++)
+  {
+    if (uart_map_grid.hal_uart[i] == NULL)
+    {
+      uart_map_grid.hal_uart[i] = uart_p;
+      uart_map_grid.bsp_uart[i] = uart;
+      return;
+    }
+  }
+}
+
+void uart_init(
+    struct uart_t *uart,
+    UART_HandleTypeDef *uart_handler,
+    uint8_t UART_stop_byte)
+{
+  uart->HW_interface = uart_handler;
+  uart->stop_byte = '\n';
+  uart->Rx_state = UART_LINE_STATE_WAIT;
+  uart->Tx_state = UART_LINE_STATE_WAIT;
+  uart->Rx_buff_sz = 0;
+  uart_reg_struct(uart, uart_handler);
+}
+
+// Tx line's functions
+
+bool uart_send_mes_IT(struct uart_t *uart, uint8_t *message)
+{
+  if (uart->Tx_state == UART_LINE_STATE_ACTIVE)
   {
     uart_error(ER_ACCESS);
     return false;
@@ -24,7 +54,7 @@ bool uart_send_mes_IT(uint8_t *message)
       uart_error(ER_TX_BUF_SZ);
       return false;
     }
-    UART_Tx_state = UART_LINE_STATE_ACTIVE;
+    uart->Tx_state = UART_LINE_STATE_ACTIVE;
     if (HAL_OK == HAL_UART_Transmit_IT(&huart1, message, strlen(message)))
       return true;
     else
@@ -35,29 +65,72 @@ bool uart_send_mes_IT(uint8_t *message)
   }
 }
 
-bool uart_ask_str_IT(uint8_t *Rx_return_ptr)
+void HAL_UART_TxCpltCallback(UART_HandleTypeDef *huart)
 {
-  if (UART_Rx_state == UART_LINE_STATE_ACTIVE)
+  for (uint8_t i = 0; i < max_map_grid_records; i++)
+  {
+    if (uart_map_grid.hal_uart == huart)
+    {
+      struct uart_t *uart = uart_map_grid.bsp_uart[i];
+      if (uart->Tx_state == UART_LINE_STATE_ACTIVE)
+        uart->Tx_state = UART_LINE_STATE_READY;
+    }
+  }
+}
+
+// Rx line's functions
+
+bool uart_ask_str_IT(struct uart_t *uart, uint8_t *Rx_return_ptr)
+{
+  if (uart->Rx_state == UART_LINE_STATE_ACTIVE)
   {
     uart_error(ER_ACCESS);
     return false;
   }
   else
   {
-    Rx_buf_size = strlen(Rx_return_ptr);
-    if (Rx_buf_size > max_Rx_buf)
+    uart->Rx_buff_sz = strlen(Rx_return_ptr);
+    if (uart->Rx_buff_sz > max_Rx_buf)
     {
       uart_error(ER_RX_BUF_SZ);
       return false;
     }
-    UART_Rx_state = UART_LINE_STATE_ACTIVE;
-    Rx_buff = Rx_return_ptr;
-    if (HAL_OK == HAL_UART_Receive_IT(&huart1, Rx_buff, 1))
+    uart->Rx_state = UART_LINE_STATE_ACTIVE;
+    uart->Rx_buff = Rx_return_ptr;
+    if (HAL_OK == HAL_UART_Receive_IT(&huart1, uart->Rx_buff, 1))
       return true;
     else
     {
       uart_error(ER_TX_HAL);
       return false;
+    }
+  }
+}
+
+// interaption processing
+
+void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
+{
+  for (uint8_t i = 0; i < max_map_grid_records; i++)
+  {
+    if (uart_map_grid.hal_uart == huart)
+    {
+      struct uart_t *uart = uart_map_grid.bsp_uart[i];
+      if (*uart->Rx_buff != uart->stop_byte)
+      {
+        uart->Rx_buff_sz--;
+        uart->Rx_buff++;
+        if (uart->Rx_buff_sz == 0)
+        {
+          uart_error(ER_RX_BUF_SZ);
+        }
+        HAL_UART_Receive_IT(&huart1, uart->Rx_buff, 1);
+      }
+      else
+      {
+        uart->Rx_state = UART_LINE_STATE_READY;
+        HAL_Delay(100);
+      }
     }
   }
 }
@@ -80,42 +153,5 @@ void uart_error(enum UART_ERROR error)
     //   break;
     // default:
     //   break;
-  }
-}
-
-// interaption processing
-
-__weak void uart_str_RxCPLTCallback()
-{
-}
-
-void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
-{
-  if (huart->Instance == USART1)
-  {
-    if (*Rx_buff != UART_stop_byte)
-    {
-      Rx_buf_size--;
-      Rx_buff++;
-      if (Rx_buf_size == 0)
-      {
-        uart_error(ER_RX_BUF_SZ);
-      }
-      HAL_UART_Receive_IT(&huart1, Rx_buff, 1);
-    }
-    else
-    {
-      UART_Rx_state = UART_LINE_STATE_READY;
-      uart_str_RxCPLTCallback();
-    }
-  }
-}
-
-void HAL_UART_TxCpltCallback(UART_HandleTypeDef *huart)
-{
-  if (huart->Instance == USART1)
-  {
-    if (UART_Tx_state == UART_LINE_STATE_ACTIVE)
-      UART_Tx_state = UART_LINE_STATE_READY;
   }
 }

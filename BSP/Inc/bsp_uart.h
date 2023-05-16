@@ -7,6 +7,24 @@
 #include "string.h"
 #include "usart.h"
 
+#define max_Tx_buf 100
+#define max_Rx_buf 100
+
+struct uart_t
+{
+  UART_HandleTypeDef *HW_interface;
+  uint8_t *Rx_buff;
+  uint8_t stop_byte;
+  enum
+  {
+    UART_LINE_STATE_WAIT,
+    UART_LINE_STATE_READY,
+    UART_LINE_STATE_ACTIVE
+  } Rx_state,
+      Tx_state;
+  uint8_t Rx_buff_sz;
+};
+
 enum UART_ERROR
 {
   ER_RX_BUF_OVERFLOW,
@@ -16,40 +34,12 @@ enum UART_ERROR
   ER_TX_HAL
 };
 
-// typedef enum
-// {
-//   WAIT,
-//   READY,
-//   ACTIVE
-// } UART_LINE_STATE;
+void uart_init(struct uart_t *uart, UART_HandleTypeDef *uart_handler, uint8_t UART_stop_byte);
 
-// enum UART_LINE_STATE
-// {
-// WAIT,
-// READY,
-// ACTIVE
-// };
+bool uart_send_mes_IT(struct uart_t *uart, uint8_t *message);
 
-// enum UART_LINE_STATE UART_Tx_state = WAIT;
-// enum UART_LINE_STATE UART_Rx_state = WAIT;
+bool uart_ask_str_IT(struct uart_t *uart, uint8_t *Rx_return_ptr);
 
-static enum {
-  UART_LINE_STATE_WAIT,
-  UART_LINE_STATE_READY,
-  UART_LINE_STATE_ACTIVE
-} UART_Rx_state = UART_LINE_STATE_WAIT,
-  UART_Tx_state = UART_LINE_STATE_WAIT;
-
-// static enum {
-//   WAIT,
-//   READY,
-//   ACTIVE
-// } UART_Rx_state = WAIT,
-//   UART_Tx_state = WAIT;
-
-bool uart_send_mes_IT(uint8_t *message);
-bool uart_ask_str_IT(uint8_t *dst_ptr);
-void uart_str_RxCPLTCallback();
 void uart_error(enum UART_ERROR error);
 
 #endif /* INC_BSP_APP_H_ */
