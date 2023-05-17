@@ -1,5 +1,7 @@
 #include "console.h"
 
+#define whitespaces " \n\t\r"
+
 void console_init(struct console_t *terminal, struct uart_t *uart)
 {
     terminal->uart_driver = uart;
@@ -17,7 +19,9 @@ bool console_is_ready(struct console_t *terminal)
 
 void console_start(struct console_t *terminal)
 {
-    uart_send_mes_IT(terminal->uart_driver, "user@blue_pill:$ ");
+    uart_send_mes_IT(terminal->uart_driver, "\nuser@blue_pill:$ ");
+    memset(terminal->cmd_line, 0, sizeof(terminal->cmd_line));
+    memset(terminal->cmd_line_args, 0, sizeof(terminal->cmd_line_args));
     uart_ask_str_IT(terminal->uart_driver, terminal->cmd_line);
 }
 
@@ -51,15 +55,15 @@ bool console_processing(struct console_t *terminal)
     }
     else
     {
-        uint8_t *word;
+        uint8_t *word; // искать проблему здесь
         uint8_t i = 0;
 
-        word = strtok(terminal->cmd_line, " "); // проверить как strtok работает
+        word = strtok(terminal->cmd_line, whitespaces); // проверить как strtok работает
         while (word != NULL)
         {
             terminal->cmd_line_args[i] = word;
             i++;
-            word = strtok(NULL, " ");
+            word = strtok(NULL, whitespaces);
         }
         // request_word_arr[i] = NULL;          хз что это, надо вспомнить и подписать
 
@@ -67,11 +71,27 @@ bool console_processing(struct console_t *terminal)
         {
             console_whoareyou(terminal);
         }
+
+        else if (strcmp(terminal->cmd_line_args[0], "led") == 0)
+        {
+            console_led(terminal);
+        }
+        console_start(terminal);
     }
 }
 
 void console_whoareyou(struct console_t *terminal)
 {
-    uart_send_mes_IT(terminal, "drives\n");
-    console_start(terminal);
+    console_send_mes(terminal, "blue_pill");
+}
+
+void console_led(struct console_t *terminal)
+{
+    uint8_t *led_state = terminal->cmd_line_args[1];
+    if (strcmp(led_state, "on") == 0)
+        HAL_GPIO_WritePin(LED_GPIO_Port, LED_Pin, SET);
+    else if (strcmp(led_state, "off") == 0)
+        HAL_GPIO_WritePin(LED_GPIO_Port, LED_Pin, RESET);
+    else
+        console_send_mes(terminal, "wrong args\n");
 }

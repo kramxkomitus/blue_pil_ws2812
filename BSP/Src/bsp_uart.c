@@ -69,11 +69,12 @@ void HAL_UART_TxCpltCallback(UART_HandleTypeDef *huart)
 {
   for (uint8_t i = 0; i < max_map_grid_records; i++)
   {
-    if (uart_map_grid.hal_uart == huart)
+    if (uart_map_grid.hal_uart [i]== huart)
     {
       struct uart_t *uart = uart_map_grid.bsp_uart[i];
       if (uart->Tx_state == UART_LINE_STATE_ACTIVE)
         uart->Tx_state = UART_LINE_STATE_READY;
+        return;
     }
   }
 }
@@ -113,7 +114,7 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 {
   for (uint8_t i = 0; i < max_map_grid_records; i++)
   {
-    if (uart_map_grid.hal_uart == huart)
+    if (uart_map_grid.hal_uart[i] == huart)
     {
       struct uart_t *uart = uart_map_grid.bsp_uart[i];
       if (*uart->Rx_buff != uart->stop_byte)
@@ -129,7 +130,6 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
       else
       {
         uart->Rx_state = UART_LINE_STATE_READY;
-        HAL_Delay(100);
       }
     }
   }

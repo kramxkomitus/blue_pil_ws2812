@@ -24,10 +24,10 @@ void app()
     struct console_t terminal_1;
     uart_init(&uart_1, &huart1, '\n');
     console_init(&terminal_1, &uart_1);
-
+    console_start(&terminal_1);
     while (1)
     {
-        console_send_mes(&terminal_1, "start\n");
+        // console_send_mes(&terminal_1, "start\n");
         console_processing(&terminal_1);
         HAL_Delay(100);
         /* code */
