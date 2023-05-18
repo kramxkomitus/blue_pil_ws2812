@@ -4,6 +4,7 @@
 
 void console_init(struct console_t *terminal, struct uart_t *uart)
 {
+    
     terminal->uart_driver = uart;
 }
 
@@ -89,9 +90,9 @@ void console_led(struct console_t *terminal)
 {
     uint8_t *led_state = terminal->cmd_line_args[1];
     if (strcmp(led_state, "on") == 0)
-        HAL_GPIO_WritePin(LED_GPIO_Port, LED_Pin, SET);
-    else if (strcmp(led_state, "off") == 0)
         HAL_GPIO_WritePin(LED_GPIO_Port, LED_Pin, RESET);
+    else if (strcmp(led_state, "off") == 0)
+        HAL_GPIO_WritePin(LED_GPIO_Port, LED_Pin, SET);
     else
         console_send_mes(terminal, "wrong args\n");
 }

@@ -3,7 +3,7 @@
 
 #include "main.h"
 #include "stdbool.h"
-// #include "ws2812.h"
+#include "ws2812.h"
 #include "stm32f1xx_it.h"
 #include "console.h"
 #include "bsp_uart.h"

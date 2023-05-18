@@ -5,30 +5,31 @@
 
 // static uint8_t led_buf[PACKEGE_LEN] = {};
 
+#pragma message("")
+
+
 void app()
 {
-    // extern DMA_HandleTypeDef hdma_tim1_ch1;
-    // uint8_t RGB[3] = {100, 100, 100};
-    // struct led_strp led;
-    // ws2812_init(&led, led_buf, LEDS, &htim1, TIM_CHANNEL_1, &hdma_tim1_ch1);
-    // ws2812_set_LED(&led, 1, RGB);
-
-    // uart_send_mes_IT("Hello world!\n");
-    // console_start();
-
-    // uint8_t flag = 0;
-    // uint8_t Rx_buff[20] = {0};
-    // uart_ask_str_IT(Rx_buff);
-
     struct uart_t uart_1;
-    struct console_t terminal_1;
     uart_init(&uart_1, &huart1, '\n');
+
+    struct console_t terminal_1;
     console_init(&terminal_1, &uart_1);
     console_start(&terminal_1);
+
+    struct led_strp_t strip;
+    uint8_t led_array[24] = {0};
+    extern DMA_HandleTypeDef hdma_tim1_ch1;
+    uint8_t RGB[3] = {100, 100, 100};
+
+    WS2812_INIT(name, &htim1, TIM_CHANNEL_1, &hdma_tim1_ch1, 8);
+
+    ws2812_set_LED(&strip, 0, &RGB);
+
     while (1)
     {
-        // console_send_mes(&terminal_1, "start\n");
         console_processing(&terminal_1);
+
         HAL_Delay(100);
         /* code */
     }

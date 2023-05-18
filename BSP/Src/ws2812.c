@@ -11,10 +11,10 @@
 
 #define TX_ARR_SIZE LEDS
 
-#define bit_is_set(byte, bitNo) ((byte & (1 << bitNo)) != 0) // check is that bit == 1
+#define BIT_IS_SET(byte, bitNo) ((byte & (1 << bitNo)) != 0) // check is that bit == 1
 
-struct led_strp ws2812_init(
-    struct led_strp *led,
+void ws2812_init(
+    struct led_strp_t *led,
     uint8_t *buf,
     uint16_t leds,
     TIM_HandleTypeDef *tim,
@@ -34,15 +34,19 @@ void ws2812_CallBack(DMA_HandleTypeDef *_hdma)
     HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
 }
 
+bool ws2812_set_LED(struct led_strp_t *S, uint8_t led_No, uint8_t *RGB_arr)
+// функция получает указатель на структуру ленты, номер диода, и указатель на
+// массив из 3х элементов
 
-bool ws2812_set_LED(struct led_strp *S, uint8_t led_No, uint8_t *RGB_arr)
 {
+    // uint8_t A = RGB[0];
+
     uint8_t *led_ptr = S->buf + led_No * 24;
     for (uint8_t i = 0; i < 3; i++)
     {
-        for (uint8_t j = 0; j < 8; j++)
+        for (int8_t j = 7; j >= 0; j--)
         {
-            if (bit_is_set(*RGB_arr, j))
+            if (BIT_IS_SET(*RGB_arr, j))
                 *led_ptr = 2;
             else
                 *led_ptr = 1;
@@ -51,8 +55,6 @@ bool ws2812_set_LED(struct led_strp *S, uint8_t led_No, uint8_t *RGB_arr)
         RGB_arr++;
     }
 }
-
-
 
 // bool ws2812_set_LED_arr(uint8_t **i_arr, uint8_t start_LED_No, uint8_t amount)
 // {
@@ -63,7 +65,7 @@ bool ws2812_set_LED(struct led_strp *S, uint8_t led_No, uint8_t *RGB_arr)
 //     }
 // }
 
-void ws2812_send(struct led_strp *S)
+void ws2812_send(struct led_strp_t *S)
 {
     HAL_TIM_PWM_Start_DMA(&S->tim, S->tim_chanel, S->buf, 8);
 }
