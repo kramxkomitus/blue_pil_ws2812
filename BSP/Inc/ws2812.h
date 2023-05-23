@@ -18,6 +18,7 @@ struct led_strp_t
         ACTIVE
     } state;
 
+    uint16_t leds;
     TIM_HandleTypeDef *tim;
     uint32_t tim_chanel;
     DMA_HandleTypeDef *dma;

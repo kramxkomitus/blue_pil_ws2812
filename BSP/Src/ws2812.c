@@ -1,4 +1,6 @@
 #include "ws2812.h"
+#include "string.h"
+
 // WS2812B
 //  ___________
 // _| 0.4 mks |_______0.85mks_ --> 0 code
@@ -26,7 +28,9 @@ void ws2812_init(
     led->tim = tim;
     led->tim_chanel = tim_chanel;
     led->dma = dma;
+    led->leds = leds;
     HAL_DMA_RegisterCallback(dma, HAL_DMA_XFER_CPLT_CB_ID, ws2812_CallBack);
+    memset(led->buf, 0, led->leds * 24);
 }
 
 void ws2812_CallBack(DMA_HandleTypeDef *_hdma)
@@ -40,20 +44,25 @@ bool ws2812_set_LED(struct led_strp_t *S, uint8_t led_No, uint8_t *RGB_arr)
 
 {
     // uint8_t A = RGB[0];
-
-    uint8_t *led_ptr = S->buf + led_No * 24;
-    for (uint8_t i = 0; i < 3; i++)
+    if (S->leds > led_No)
     {
-        for (int8_t j = 7; j >= 0; j--)
+        uint8_t *led_ptr = S->buf + led_No * 24;
+        for (uint8_t i = 0; i < 3; i++)
         {
-            if (BIT_IS_SET(*RGB_arr, j))
-                *led_ptr = 2;
-            else
-                *led_ptr = 1;
-            led_ptr++;
+            for (int8_t j = 7; j >= 0; j--)
+            {
+                if (BIT_IS_SET(*RGB_arr, j))
+                    *led_ptr = 2;
+                else
+                    *led_ptr = 1;
+                led_ptr++;
+            }
+            RGB_arr++;
         }
-        RGB_arr++;
+        return true;
     }
+    else
+        return false;
 }
 
 // bool ws2812_set_LED_arr(uint8_t **i_arr, uint8_t start_LED_No, uint8_t amount)

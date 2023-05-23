@@ -7,7 +7,6 @@
 
 #pragma message("")
 
-
 void app()
 {
     struct uart_t uart_1;
@@ -17,18 +16,20 @@ void app()
     console_init(&terminal_1, &uart_1);
     console_start(&terminal_1);
 
-    struct led_strp_t strip;
-    uint8_t led_array[24] = {0};
+    // struct led_strp_t strip;
+    // uint8_t led_array[24] = {0};
     extern DMA_HandleTypeDef hdma_tim1_ch1;
     uint8_t RGB[3] = {100, 100, 100};
 
-    WS2812_INIT(name, &htim1, TIM_CHANNEL_1, &hdma_tim1_ch1, 8);
-
-    ws2812_set_LED(&strip, 0, &RGB);
+    WS2812_INIT(STRIP, &htim1, TIM_CHANNEL_1, &hdma_tim1_ch1, 8);
 
     while (1)
     {
         console_processing(&terminal_1);
+        for (uint8_t i = 0; i < 8; i++)
+        {
+            ws2812_set_LED(&STRIP, i, &RGB);
+        }
 
         HAL_Delay(100);
         /* code */
